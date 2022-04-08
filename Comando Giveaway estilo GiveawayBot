@@ -1,0 +1,60 @@
+/**
+ Hola hoy traigo un comando muy facil de giveaway para la version v13 de Discord muy parecido al de GiveawayBot
+ Espero que te sirva, alguna duda o error mencioname en el servidor de MyBot
+ */
+
+const { MessageEmbed } = require("discord.js");//Necesitamos discord.js version 13
+const ms = require("ms");//Necesitamos ms
+module.exports = {//Exportamos
+  name: "giveaway",//Colocamos el nombre del comando
+  run: async (client, message, args) => {//Si te sale cmd.execute is a not function remplaza el run por un execute
+
+
+    if (!args[0]) return message.channel.send(`Ingresa un tiempo`);//Si no coloca argumentos0 retornamos
+    if (!args[0].endsWith("d") && !args[0].endsWith("h") && !args[0].endsWith("m"))
+      return message.channel.send(
+        `El tiempo debe terminar en: \`d/h/m\``
+      );//Si los argumentos0 no terminan en d, h o m retornamos
+    if (isNaN(args[0][0])) return message.channel.send(`El tiempo debe ser un numero`);//Si los argumentos0 no son un numero valido retornamos
+    let channel = message.mentions.channels.first()//Definimos channel
+    if(!channel) return message.reply({ content: `Debes mencionar un canal`})
+    let prize = args.slice(2).join(" ");//Definimos prize y con el slice saltamos por asi decirlo los argumentos0 y la mencion del canal para que no los tome como un prize
+    if (!prize) return message.channel.send(`Ingresa el premio del Sorteo`);//Si no ingresa el prize retornamos
+    const a = (Date.now() + ms(args[0])).toFixed(0)//Hacemos la constante a que sera la fecha de cuando se ejecuto el comando + el tiempo que ingreso el usuario
+    const b = (a / 1000).toFixed(0)//hacemos la constante b que sera la constante a dividida a 1000
+    let Embed = new MessageEmbed()//Creamos un nuevo embed
+      .setTitle(`Nuevo Sorteo Inciado!`)//Colocamos un title
+      .setDescription(
+        `
+        Sorteo hosteado por: **${message.author.tag}**
+        Recompensa del Sorteo: **${prize}**
+        Termina: <t:${b}:R>
+        Empezo: <t:${(Date.now() / 1000).toFixed(0)}:R>
+        `
+      )//Colocamos la descripcion e ingresamos los datos ya previamente definidos
+      .setColor(`RANDOM`);//Seteamos el color en mi caso sera un color random
+    let m = await channel.send({embeds: [Embed]});//Hacemos un let y enviamos el mensaje
+    m.react("🎉");//Reaccionamos con el emoji que quieran
+    setTimeout(() => {//Abrimos un timeout
+      if (m.reactions.cache.get("🎉").count <= 1) {//Si la cantidad de reacciones es solamente 1 retornamos cuando acabe el tiempo
+        return channel.send(
+          `No reaccionaron las suficientes personas para dar un ganador`
+        );
+      };
+
+      let winner = m.reactions.cache
+        .get("🎉")
+        .users.cache.filter((user) => !user.bot)
+        .random();//Definimos un ganador random sin incluir al bot
+      channel.send(//Enviamos al canal que gano la persona aleatoria
+        `Felicidades ${winner} acabas de ganar **${prize}** `
+      )
+      m.edit({
+        embeds: [new MessageEmbed().addField("Reacciones totales:", `${m.reactionsse.cache.get("🎉").count}`, true).setDescription(`Sorteo hosteado por: **${message.author.tag}**\nRecompensa del Sorteo: **${prize}**\nTermina el: **Sorteo Terminado**\nGanador: **${winner}**`).setColor("BLUE")]
+      })//Y editamos el mensaje con nuevos datos
+    }, ms(args[0]));//Al final del timeout colocamos el tiempo que se tardara en acabar el timeout, en nuestro caso el tiempo que coloco el usuario
+  }//Cerramos
+};//Cerramos
+
+//Con esto ya terminamos el codigo
+//Recuerda seguirme y darle like al codigo para conseguir el rol mediano en MyBot :D
