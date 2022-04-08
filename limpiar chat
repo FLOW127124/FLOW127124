@@ -1,0 +1,4 @@
+//este comando puede ser utilizado para eliminar mensajes en un chat
+
+if(!args) {let args = 2 } // si una cantidad no esta especificada automaticamente eliminara 2 mensajes
+message.channel.bulkDelete(args); //esto elimina el mensaje
